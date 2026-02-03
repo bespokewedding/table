@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>夢幻婚禮排座小幫手 (暗花明顯版)</title>
+    <title>夢幻婚禮排座小幫手 (暗花強制顯示版)</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/Sortable/1.15.0/Sortable.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
@@ -196,24 +196,66 @@
         document.getElementById('tables-stage').style.transform = `scale(${currentZoom})`;
     }
 
+    // --- 強化版匯出功能 ---
     function exportToImage() {
         const stage = document.getElementById('tables-stage');
         const originalTransform = stage.style.transform;
+        
+        // 1. 準備：恢復原始比例以便正確擷取
         stage.style.transform = "scale(1)"; 
+
         html2canvas(stage, {
-            useCORS: true, scale: 2, backgroundColor: "#fff5f7",
+            useCORS: true,           // 關鍵：允許跨域圖片
+            allowTaint: true,       // 關鍵：允許污染畫布（如果 CORS 失敗則嘗試此法）
+            scale: 2,               // 提高解析度
+            backgroundColor: "#fff5f7",
             onclone: (clonedDoc) => {
                 const clonedStage = clonedDoc.getElementById('tables-stage');
+                
+                // 創建一個暗花容器層，確保置於最底
                 const overlay = clonedDoc.createElement('div');
-                // 這裡強化了暗花透明度 (0.35) 與背景尺寸 (180px)
-                overlay.style.cssText = "position:absolute;top:0;left:0;width:100%;height:100%;background-image:url('https://www.bespoke-wedding.com/sites/default/files/%E7%A6%AE%E5%8D%A1/logo/Bespoke_logo-Aqua1_long1.png');background-repeat:repeat;background-size:180px;opacity:0.35;z-index:0;pointer-events:none;";
+                overlay.id = "watermark-overlay";
+                overlay.style.cssText = `
+                    position: absolute;
+                    top: 0; left: 0;
+                    width: 100%; height: 100%;
+                    background-image: url('https://www.bespoke-wedding.com/sites/default/files/%E7%A6%AE%E5%8D%A1/logo/Bespoke_logo-Aqua1_long1.png');
+                    background-repeat: repeat;
+                    background-size: 180px;
+                    opacity: 0.45; /* 再次提高透明度 */
+                    z-index: -1;
+                    pointer-events: none;
+                `;
+                
+                // 備用方案：如果圖片真的加載不了，加入文字暗花作為保障
+                const textBack = clonedDoc.createElement('div');
+                textBack.style.cssText = `
+                    position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+                    display: flex; flex-wrap: wrap; justify-content: space-around;
+                    align-content: space-around; z-index: -2; opacity: 0.1;
+                    font-size: 40px; font-weight: bold; color: #ffb3c1; pointer-events: none;
+                `;
+                for(let i=0; i<30; i++) {
+                    const span = clonedDoc.createElement('span');
+                    span.innerText = "BESPOKE WEDDING";
+                    span.style.transform = "rotate(-30deg)";
+                    textBack.appendChild(span);
+                }
+
+                clonedStage.style.backgroundColor = "#fff5f7";
                 clonedStage.prepend(overlay);
+                clonedStage.prepend(textBack);
             }
         }).then(canvas => {
             const link = document.createElement('a');
             link.download = `婚禮座位表_${new Date().getTime()}.png`;
             link.href = canvas.toDataURL("image/png");
             link.click();
+            
+            // 恢復原本的縮放比例
+            stage.style.transform = originalTransform;
+        }).catch(err => {
+            alert("匯出失敗，請檢查網路連線或稍後再試。");
             stage.style.transform = originalTransform;
         });
     }
@@ -301,11 +343,11 @@
                 if (c) { const info = c.querySelector('small').innerText.split('|'); data.assigned[`${tid}_${idx}`] = {name: c.querySelector('strong').innerText, side: info[0].trim(), role: info[1].trim()}; }
             });
         });
-        localStorage.setItem('wedding_db_final', JSON.stringify(data));
+        localStorage.setItem('wedding_db_final_v11', JSON.stringify(data));
     }
 
     function loadSavedData() {
-        const raw = localStorage.getItem('wedding_db_final');
+        const raw = localStorage.getItem('wedding_db_final_v11');
         if (!raw) { createTables(); return; }
         const data = JSON.parse(raw);
         document.getElementById('layout-config').value = data.layout;
@@ -319,7 +361,7 @@
         }
     }
 
-    function clearAllStorage() { if(confirm("確定重置？")) { localStorage.removeItem('wedding_db_final'); location.reload(); } }
+    function clearAllStorage() { if(confirm("確定重置？")) { localStorage.removeItem('wedding_db_final_v11'); location.reload(); } }
     function downloadTemplate() { const ws = XLSX.utils.aoa_to_sheet([["姓名", "男家/女家", "分類"], ["王小明", "男家", "朋友"]]); const wb = XLSX.utils.book_new(); XLSX.utils.book_append_sheet(wb, ws, "範本"); XLSX.writeFile(wb, "賓客範本.xlsx"); }
     function handleImport(input) {
         const file = input.files[0]; if (!file) return;
