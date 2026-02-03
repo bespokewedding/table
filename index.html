@@ -11,7 +11,7 @@
             --pink-bg: #fff5f7;
             --pink-main: #ffb3c1;
             --blue-main: #a2d2ff;
-            --text-dark: #000000; /* 強制全域文字基礎色為黑 */
+            --text-dark: #000000; 
             --danger: #ff4d4f;
         }
 
@@ -29,7 +29,7 @@
             touch-action: manipulation;
         }
 
-        /* --- Logo 區塊樣式 (放大3倍) --- */
+        /* --- Logo 區塊樣式 --- */
         #header-logo {
             width: 100%;
             background: white;
@@ -47,7 +47,7 @@
             line-height: 0;
         }
         #header-logo img {
-            height: 105px; /* 35px * 3 = 105px */
+            height: 105px; 
             width: auto;
         }
 
@@ -64,6 +64,12 @@
             box-sizing: border-box;
         }
 
+        .config-wrapper {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+
         .config-section {
             background: #fdf2f4;
             padding: 6px 10px;
@@ -77,6 +83,37 @@
             box-sizing: border-box;
             overflow-x: auto;
             white-space: nowrap;
+            transition: max-height 0.3s ease-out, padding 0.3s ease;
+        }
+
+        /* 收合狀態樣式 */
+        .config-section.collapsed {
+            max-height: 0;
+            padding-top: 0;
+            padding-bottom: 0;
+            border: none;
+            overflow: hidden;
+            margin: 0;
+        }
+
+        .section-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            cursor: pointer;
+            padding: 2px 5px;
+            background: #f9f9f9;
+            border-radius: 4px;
+            margin-bottom: 2px;
+        }
+
+        .toggle-btn {
+            background: none;
+            border: none;
+            color: #d63384;
+            font-weight: bold;
+            font-size: 14px;
+            cursor: pointer;
         }
 
         .config-section label {
@@ -112,6 +149,9 @@
             margin: 0;
             font-size: 13px;
             color: var(--pink-main);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
         }
 
         #guest-list-container {
@@ -128,9 +168,17 @@
             box-sizing: border-box;
             scrollbar-width: thin;
             scrollbar-color: var(--pink-main) transparent;
+            transition: max-height 0.3s ease;
         }
 
-        /* 賓客卡片 - 強制黑色字體 */
+        #guest-list-container.collapsed {
+            height: 0;
+            padding: 0;
+            border: none;
+            overflow: hidden;
+        }
+
+        /* 賓客卡片 */
         .guest-card {
             padding: 4px 8px;
             border-radius: 8px;
@@ -147,7 +195,7 @@
             justify-content: center;
             box-sizing: border-box;
             position: relative;
-            color: #000000 !important; /* 強制黑字 */
+            color: #000000 !important;
             user-select: none;
         }
 
@@ -160,12 +208,12 @@
             overflow: hidden;
             text-overflow: ellipsis;
             white-space: nowrap;
-            color: #000000 !important; /* 姓名黑字 */
+            color: #000000 !important;
         }
 
         .guest-card small { 
             font-size: 9px; 
-            color: #000000 !important; /* 家方/分類黑字 */
+            color: #000000 !important;
             font-weight: bold;
         }
 
@@ -187,7 +235,6 @@
             z-index: 2;
         }
 
-        /* 畫布區 - 修正電腦版顯示 */
         #canvas-wrapper {
             flex: 1;
             position: relative;
@@ -213,9 +260,8 @@
             box-sizing: border-box;
         }
 
-        /* 重要：電腦版佈局修復 */
         #tables-stage {
-            display: block; /* 避免 inline-flex 在電腦版導致的寬度坍縮 */
+            display: block; 
             width: fit-content; 
             min-width: 100%;
         }
@@ -227,7 +273,7 @@
             gap: 40px; 
             margin-bottom: 100px;
             padding: 0 40px;
-            width: fit-content; /* 確保行容器隨內容延伸 */
+            width: fit-content;
         }
 
         .table-wrap {
@@ -286,7 +332,6 @@
         
         .seat .guest-card .del-btn { display: none; }
 
-        /* Modal 修改視窗 */
         #modal-overlay {
             display: none;
             position: fixed;
@@ -326,7 +371,7 @@
 
 <div id="header-logo">
     <a href="https://www.bespoke-wedding.com/" target="_blank">
-        <img src="https://www.bespoke-wedding.com/sites/default/files/%E7%A6%AE%E5%8D%A1/logo/Bespoke_logo-Aqua1_long1.png" alt="Company Logo">
+        <img src="https://www.bespoke-wedding.com/sites/default/files/%E7%A6%AE%E5%8D%A1/logo/Bespoke_logo-Aqua1_long1.png" alt="Bespoke Wedding Logo">
     </a>
 </div>
 
@@ -349,38 +394,59 @@
 </div>
 
 <div id="control-panel">
-    <div class="config-section">
-        <label>1. 佈局:</label>
-        <input type="text" id="layout-config" value="2,3,3">
-        <label>人數:</label>
-        <input type="number" id="per-table-limit" value="12">
-        <button class="btn btn-pink" onclick="handleCreateTables()">套用</button>
-        <button class="btn btn-grey" onclick="clearAllStorage()" style="font-size:9px;">清空重置</button>
+    <div class="config-wrapper">
+        <div class="section-header" onclick="toggleSection('sec-layout', 'btn-layout')">
+            <span style="font-size: 11px; font-weight: bold; color: #d63384;">1. 佈局設定</span>
+            <span id="btn-layout" class="toggle-btn">▲</span>
+        </div>
+        <div id="sec-layout" class="config-section">
+            <label>佈局數:</label>
+            <input type="text" id="layout-config" value="2,3,3">
+            <label>每桌人數:</label>
+            <input type="number" id="per-table-limit" value="12">
+            <button class="btn btn-pink" onclick="handleCreateTables()">套用</button>
+            <button class="btn btn-grey" onclick="clearAllStorage()" style="font-size:9px;">重置</button>
+        </div>
     </div>
-    <div class="config-section" style="background: #eef7ff; border-color: var(--blue-main);">
-        <label>2. 新增:</label>
-        <input type="text" id="manual-name" placeholder="姓名">
-        <select id="manual-side">
-            <option value="男家">男家</option>
-            <option value="女家">女家</option>
-        </select>
-        <select id="manual-role">
-            <option value="朋友">朋友</option>
-            <option value="親戚">親戚</option>
-            <option value="同事">同事</option>
-        </select>
-        <button class="btn btn-blue" onclick="addManualGuest()">加入</button>
+
+    <div class="config-wrapper">
+        <div class="section-header" onclick="toggleSection('sec-add', 'btn-add')">
+            <span style="font-size: 11px; font-weight: bold; color: #0056b3;">2. 新增賓客</span>
+            <span id="btn-add" class="toggle-btn">▲</span>
+        </div>
+        <div id="sec-add" class="config-section" style="background: #eef7ff; border-color: var(--blue-main);">
+            <input type="text" id="manual-name" placeholder="姓名">
+            <select id="manual-side">
+                <option value="男家">男家</option>
+                <option value="女家">女家</option>
+            </select>
+            <select id="manual-role">
+                <option value="朋友">朋友</option>
+                <option value="親戚">親戚</option>
+                <option value="同事">同事</option>
+            </select>
+            <button class="btn btn-blue" onclick="addManualGuest()">加入</button>
+        </div>
     </div>
-    <div class="config-section">
-        <label>3. 數據:</label>
-        <button class="btn btn-grey" onclick="downloadTemplate()">範本</button>
-        <button class="btn btn-blue" onclick="document.getElementById('excel-upload').click()">匯入</button>
-        <input type="file" id="excel-upload" hidden accept=".xlsx, .xls" onchange="handleImport(this)">
+
+    <div class="config-wrapper">
+        <div class="section-header" onclick="toggleSection('sec-data', 'btn-data')">
+            <span style="font-size: 11px; font-weight: bold; color: #444;">3. 數據管理</span>
+            <span id="btn-data" class="toggle-btn">▲</span>
+        </div>
+        <div id="sec-data" class="config-section">
+            <button class="btn btn-grey" onclick="downloadTemplate()">範本</button>
+            <button class="btn btn-blue" onclick="document.getElementById('excel-upload').click()">匯入</button>
+            <input type="file" id="excel-upload" hidden accept=".xlsx, .xls" onchange="handleImport(this)">
+        </div>
     </div>
 </div>
 
 <div id="list-panel">
-    <h3>💕 待分配賓客名單 (左右滑動)</h3>
+    <h3 onclick="toggleGuestList()">
+        <span>💕 待分配賓客名單 (左右滑動)</span>
+        <span id="btn-guest" class="toggle-btn">▲</span>
+    </h3>
     <div id="guest-list-container"></div>
 </div>
 
@@ -396,7 +462,21 @@
 <script>
     let currentEditingTable = null;
 
-    // 跨裝置 Sortable 設定
+    // 收合功能
+    function toggleSection(secId, btnId) {
+        const sec = document.getElementById(secId);
+        const btn = document.getElementById(btnId);
+        sec.classList.toggle('collapsed');
+        btn.innerText = sec.classList.contains('collapsed') ? '▼' : '▲';
+    }
+
+    function toggleGuestList() {
+        const list = document.getElementById('guest-list-container');
+        const btn = document.getElementById('btn-guest');
+        list.classList.toggle('collapsed');
+        btn.innerText = list.classList.contains('collapsed') ? '▼' : '▲';
+    }
+
     const sortableOptions = {
         group: 'wedding',
         animation: 150,
@@ -406,8 +486,6 @@
     };
 
     new Sortable(document.getElementById('guest-list-container'), sortableOptions);
-
-    // --- 數據持久化 ---
 
     function saveAllData() {
         const data = {
@@ -483,8 +561,6 @@
         }
     }
 
-    // --- 桌位與賓客 ---
-
     function handleCreateTables() {
         if(confirm("套用佈局會重置桌子安排，確定嗎？")) { createTables(); saveAllData(); }
     }
@@ -536,7 +612,6 @@
     function createGuestCard(name, side, role) {
         const card = document.createElement('div');
         card.className = 'guest-card' + (side === '女家' ? ' female' : '');
-        // 內嵌 HTML 確保文字純黑
         card.innerHTML = `<button class="del-btn" onclick="deleteGuest(this, '${name}')">×</button><strong>${name}</strong><small>${side}|${role}</small>`; 
         return card;
     }
@@ -572,7 +647,6 @@
         closeModal(); saveAllData();
     };
 
-    // --- Excel 匯出 (每 5 桌一組) ---
     function exportSeatingToExcel() {
         const allTables = document.querySelectorAll('.table-wrap');
         const exportData = [];
