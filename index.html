@@ -29,6 +29,28 @@
             touch-action: manipulation;
         }
 
+        /* --- 新增 Logo 區塊樣式 --- */
+        #header-logo {
+            width: 100%;
+            background: white;
+            padding: 8px 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            border-bottom: 1px solid var(--pink-main);
+            z-index: 110;
+            box-sizing: border-box;
+            flex-shrink: 0;
+        }
+        #header-logo a {
+            display: block;
+            line-height: 0;
+        }
+        #header-logo img {
+            height: 35px; /* 您可以根據 Logo 比例調整高度 */
+            width: auto;
+        }
+
         /* 功能控制區 */
         #control-panel {
             width: 100%;
@@ -301,6 +323,12 @@
     </style>
 </head>
 <body>
+
+<div id="header-logo">
+    <a href="https://www.bespoke-wedding.com/" target="_blank">
+        <img src="https://www.bespoke-wedding.com/sites/default/files/%E7%A6%AE%E5%8D%A1/logo/Bespoke_logo-Aqua1_long1.png" alt="Company Logo">
+    </a>
+</div>
 
 <div id="modal-overlay">
     <div class="modal-content">
