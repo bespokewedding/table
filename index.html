@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>夢幻婚禮排座小幫手 (比例修正版)</title>
+    <title>夢幻婚禮排座小幫手 (佈局優化版)</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/Sortable/1.15.0/Sortable.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
@@ -32,7 +32,7 @@
         #header-logo {
             width: 100%;
             background: white;
-            padding: 8px 0; /* 縮小間距 */
+            padding: 8px 0;
             display: flex;
             justify-content: center;
             align-items: center;
@@ -41,7 +41,7 @@
             flex-shrink: 0;
         }
         #header-logo img {
-            height: 60px; /* 縮小 Logo */
+            height: 55px; 
             width: auto;
         }
 
@@ -54,18 +54,16 @@
             background: white;
         }
 
-        /* 整合控制面板文字縮小 */
         .master-toggle-header {
             display: flex;
             align-items: center;
             justify-content: space-between;
             padding: 5px 15px;
             background: #fdf2f4;
-            cursor: pointer;
             border-bottom: 1px solid var(--pink-main);
         }
         .master-toggle-header span {
-            font-size: 11px; /* 縮小文字 */
+            font-size: 11px;
             font-weight: bold;
             color: #d63384;
         }
@@ -75,7 +73,6 @@
             display: flex;
             flex-direction: column; 
             gap: 4px;
-            overflow-y: auto;
         }
 
         .config-section {
@@ -90,17 +87,17 @@
             white-space: nowrap;
         }
         .config-section label {
-            font-size: 10px; /* 縮小文字 */
+            font-size: 10px;
             color: #666;
         }
         .config-section input, .config-section select {
             padding: 2px 4px;
             border: 1px solid #ddd;
             border-radius: 4px;
-            font-size: 10px; /* 縮小文字 */
+            font-size: 10px;
         }
 
-        /* 賓客名單區文字縮小 */
+        /* 賓客名單區 */
         #list-panel {
             flex: 1;
             padding: 5px 12px;
@@ -117,7 +114,7 @@
         #guest-list-container {
             flex: 1;
             display: flex;
-            flex-flow: row wrap; /* 改為橫向流動 */
+            flex-flow: row wrap;
             overflow-y: auto;
             gap: 5px;
             padding: 5px;
@@ -131,16 +128,15 @@
             background: white;
             border-left: 3px solid var(--blue-main);
             box-shadow: 0 1px 3px rgba(0,0,0,0.1);
-            font-size: 10px; /* 縮小卡片文字 */
-            width: 100px; 
-            height: 28px; 
+            font-size: 10px;
+            width: 95px; 
+            height: 26px; 
             display: flex;
             align-items: center;
             justify-content: center;
             position: relative;
         }
         .guest-card.female { border-left-color: var(--pink-main); }
-        .guest-card strong { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 
         /* --- 桌位圖畫布區域 (佔 3/5) --- */
         #canvas-wrapper { 
@@ -153,18 +149,25 @@
             border-top: 2px solid var(--pink-main);
         }
 
-        #zoom-controls {
+        /* 按鈕組放置於右上方 */
+        #action-controls {
             position: absolute;
             top: 10px;
             right: 15px;
             z-index: 100;
             display: flex;
             flex-direction: column;
-            gap: 5px;
+            gap: 8px;
+            align-items: flex-end;
+        }
+        .zoom-group {
+            display: flex;
+            gap: 4px;
         }
         .zoom-btn {
-            width: 30px; height: 30px; background: white; border: 1px solid var(--pink-main);
-            border-radius: 4px; font-size: 16px; color: var(--pink-main); cursor: pointer;
+            width: 32px; height: 32px; background: white; border: 1px solid var(--pink-main);
+            border-radius: 6px; font-size: 18px; color: var(--pink-main); cursor: pointer;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
         }
 
         #canvas { flex: 1; overflow: auto; padding: 40px; }
@@ -174,7 +177,7 @@
             width: fit-content; 
             min-width: 100%; 
             transform-origin: 0 0; 
-            background-color: transparent; /* 網頁內透明 */
+            background-color: transparent; 
             position: relative;
             padding: 30px;
         }
@@ -197,11 +200,11 @@
         }
         .seat .guest-card { border: none; box-shadow: none; width: 100%; height: 100%; background: transparent; }
 
-        .btn { cursor: pointer; padding: 4px 10px; border: none; border-radius: 10px; font-weight: bold; font-size: 10px; }
+        .btn { cursor: pointer; padding: 6px 12px; border: none; border-radius: 10px; font-weight: bold; font-size: 10px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
         .btn-pink { background: var(--pink-main); color: white; }
         .btn-blue { background: var(--blue-main); color: white; }
         .btn-grey { background: #eee; color: #444; }
-        .btn-image { background: #52c41a; color: white; }
+        .btn-image { background: #52c41a; color: white; padding: 8px 15px; font-size: 11px; }
 
     </style>
 </head>
@@ -214,7 +217,7 @@
 <div id="top-section">
     <div id="main-control-wrapper">
         <div class="master-toggle-header">
-            <span>🛠️ 設定與數據 (文字已縮小)</span>
+            <span>🛠️ 設定與數據</span>
         </div>
         <div id="control-panel">
             <div class="config-section">
@@ -233,12 +236,9 @@
                     <option value="女家">女家</option>
                 </select>
                 <button class="btn btn-blue" onclick="addManualGuest()">加入</button>
-            </div>
-            <div class="config-section">
-                <button class="btn btn-grey" onclick="downloadTemplate()">範本</button>
+                <button class="btn btn-grey" onclick="downloadTemplate()" style="margin-left:auto;">範本</button>
                 <button class="btn btn-blue" onclick="document.getElementById('excel-upload').click()">匯入 Excel</button>
                 <input type="file" id="excel-upload" hidden accept=".xlsx, .xls" onchange="handleImport(this)">
-                <button class="btn btn-image" onclick="exportToImage()">🖼️ 匯出圖片 (帶 Logo 暗花)</button>
             </div>
         </div>
     </div>
@@ -250,11 +250,15 @@
 </div>
 
 <div id="canvas-wrapper">
-    <div id="zoom-controls">
-        <button class="zoom-btn" onclick="adjustZoom(0.1)">+</button>
-        <button class="zoom-btn" onclick="adjustZoom(-0.1)">-</button>
-        <button class="btn btn-blue" onclick="exportSeatingToExcel()" style="margin-top:5px;">📊 Excel</button>
+    <div id="action-controls">
+        <div class="zoom-group">
+            <button class="zoom-btn" onclick="adjustZoom(0.1)">+</button>
+            <button class="zoom-btn" onclick="adjustZoom(-0.1)">-</button>
+        </div>
+        <button class="btn btn-image" onclick="exportToImage()">🖼️ 匯出圖片</button>
+        <button class="btn btn-blue" onclick="exportSeatingToExcel()" style="font-size: 9px;">📊 匯出 Excel</button>
     </div>
+    
     <div id="canvas">
         <div id="tables-stage"></div>
     </div>
@@ -268,7 +272,6 @@
         document.getElementById('tables-stage').style.transform = `scale(${currentZoom})`;
     }
 
-    // 匯出功能：副本添加粉色背景與 Logo 暗花
     function exportToImage() {
         const stage = document.getElementById('tables-stage');
         const originalTransform = stage.style.transform;
@@ -289,21 +292,20 @@
                 overlay.style.height = '100%';
                 overlay.style.backgroundImage = "url('https://www.bespoke-wedding.com/sites/default/files/%E7%A6%AE%E5%8D%A1/logo/Bespoke_logo-Aqua1_long1.png')";
                 overlay.style.backgroundRepeat = "repeat";
-                overlay.style.backgroundSize = "250px";
-                overlay.style.opacity = "0.07"; 
+                overlay.style.backgroundSize = "280px";
+                overlay.style.opacity = "0.08"; 
                 overlay.style.zIndex = "0";
                 clonedStage.prepend(overlay);
             }
         }).then(canvas => {
             const link = document.createElement('a');
-            link.download = `座位表_${new Date().getTime()}.png`;
+            link.download = `婚禮座位表_${new Date().getTime()}.png`;
             link.href = canvas.toDataURL("image/png");
             link.click();
             stage.style.transform = originalTransform;
         });
     }
 
-    // 以下為原始核心邏輯，不作修改
     const sortableOptions = { group: 'wedding', animation: 150, onEnd: saveAllData };
     new Sortable(document.getElementById('guest-list-container'), sortableOptions);
 
@@ -329,18 +331,18 @@
         return tableWrap;
     }
 
-    function createGuestCard(name, side, role) {
+    function createGuestCard(name, side) {
         const card = document.createElement('div');
         card.className = 'guest-card' + (side === '女家' ? ' female' : '');
         card.innerHTML = `<strong>${name}</strong>`; 
         return card;
     }
 
-    function renderGuest(name, side, role) {
-        document.getElementById('guest-list-container').appendChild(createGuestCard(name, side, role)); 
+    function renderGuest(name, side) {
+        document.getElementById('guest-list-container').appendChild(createGuestCard(name, side)); 
     }
 
-    function handleCreateTables() { if(confirm("確定套用新佈局？")) { createTables(); saveAllData(); } }
+    function handleCreateTables() { if(confirm("確定重新套用佈局？")) { createTables(); saveAllData(); } }
 
     function createTables() {
         const stage = document.getElementById('tables-stage');
@@ -369,16 +371,16 @@
                 if (card) data.assigned[`${tId}_${idx}`] = {name: card.innerText, side: card.classList.contains('female')?'女家':'男家'};
             });
         });
-        localStorage.setItem('wedding_db_v8', JSON.stringify(data));
+        localStorage.setItem('wedding_db_v9', JSON.stringify(data));
     }
 
     function loadSavedData() {
-        const raw = localStorage.getItem('wedding_db_v8');
+        const raw = localStorage.getItem('wedding_db_v9');
         if (!raw) { createTables(); return; }
         const data = JSON.parse(raw);
         document.getElementById('layout-config').value = data.layout;
         document.getElementById('per-table-limit').value = data.perLimit;
-        createTables(); // 先建立桌子
+        createTables();
         data.unassigned.forEach(g => renderGuest(g.name, g.side));
         for (const key in data.assigned) {
             const [tId, sIdx] = key.split('_');
@@ -394,7 +396,44 @@
         n.value = ''; saveAllData();
     }
 
-    function clearAllStorage() { if(confirm("確定重置？")) { localStorage.removeItem('wedding_db_v8'); location.reload(); } }
+    function clearAllStorage() { if(confirm("確定重置所有數據？")) { localStorage.removeItem('wedding_db_v9'); location.reload(); } }
+
+    function exportSeatingToExcel() {
+        const allTables = document.querySelectorAll('.table-wrap');
+        const exportData = [];
+        for (let i = 0; i < allTables.length; i += 5) {
+            const group = Array.from(allTables).slice(i, i + 5);
+            const titleRow = []; group.forEach(t => { titleRow.push(t.querySelector('.table-center').innerText); titleRow.push(""); });
+            exportData.push(titleRow);
+            const guestsInGroup = group.map(t => Array.from(t.querySelectorAll('.seat')).map(s => s.querySelector('.guest-card')?.innerText || "(空位)"));
+            const maxSeats = Math.max(...guestsInGroup.map(g => g.length));
+            for (let r = 0; r < maxSeats; r++) {
+                const row = []; guestsInGroup.forEach(list => { row.push(list[r] || ""); row.push(""); });
+                exportData.push(row);
+            }
+            exportData.push([]);
+        }
+        const ws = XLSX.utils.aoa_to_sheet(exportData);
+        const wb = XLSX.utils.book_new(); XLSX.utils.book_append_sheet(wb, ws, "座位表");
+        XLSX.writeFile(wb, "婚禮座位表.xlsx");
+    }
+
+    function downloadTemplate() {
+        const ws = XLSX.utils.aoa_to_sheet([["姓名", "男家/女家"], ["王小明", "男家"]]);
+        const wb = XLSX.utils.book_new(); XLSX.utils.book_append_sheet(wb, ws, "範本");
+        XLSX.writeFile(wb, "賓客範本.xlsx");
+    }
+
+    function handleImport(input) {
+        const file = input.files[0]; if (!file) return;
+        const reader = new FileReader();
+        reader.onload = (e) => {
+            const json = XLSX.utils.sheet_to_json(XLSX.read(new Uint8Array(e.target.result), {type: 'array'}).Sheets[XLSX.read(new Uint8Array(e.target.result), {type: 'array'}).SheetNames[0]]);
+            json.forEach(item => { if(item['姓名']) renderGuest(item['姓名'], item['男家/女家'] || '男家'); });
+            saveAllData();
+        };
+        reader.readAsArrayBuffer(file); input.value = '';
+    }
 
     window.onload = loadSavedData;
 </script>
