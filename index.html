@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>夢幻婚禮排座小幫手 (佈局優化版)</title>
+    <title>夢幻婚禮排座小幫手 (完整分類版)</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/Sortable/1.15.0/Sortable.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
@@ -28,7 +28,6 @@
             color: var(--text-dark);
         }
 
-        /* --- Logo 區塊 --- */
         #header-logo {
             width: 100%;
             background: white;
@@ -45,7 +44,7 @@
             width: auto;
         }
 
-        /* --- 上方資料區 (佔 2/5) --- */
+        /* 上方資料區 (佔 2/5) */
         #top-section {
             flex: 2; 
             display: flex;
@@ -97,7 +96,6 @@
             font-size: 10px;
         }
 
-        /* 賓客名單區 */
         #list-panel {
             flex: 1;
             padding: 5px 12px;
@@ -129,16 +127,20 @@
             border-left: 3px solid var(--blue-main);
             box-shadow: 0 1px 3px rgba(0,0,0,0.1);
             font-size: 10px;
-            width: 95px; 
-            height: 26px; 
+            width: 100px; 
+            height: 32px; 
             display: flex;
+            flex-direction: column;
             align-items: center;
             justify-content: center;
             position: relative;
+            line-height: 1.2;
         }
         .guest-card.female { border-left-color: var(--pink-main); }
+        .guest-card strong { font-size: 10px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; width: 90%; text-align: center; }
+        .guest-card small { font-size: 8px; color: #777; font-weight: normal; }
 
-        /* --- 桌位圖畫布區域 (佔 3/5) --- */
+        /* 桌位圖畫布區域 (佔 3/5) */
         #canvas-wrapper { 
             flex: 3; 
             position: relative; 
@@ -149,7 +151,6 @@
             border-top: 2px solid var(--pink-main);
         }
 
-        /* 按鈕組放置於右上方 */
         #action-controls {
             position: absolute;
             top: 10px;
@@ -235,6 +236,10 @@
                     <option value="男家">男家</option>
                     <option value="女家">女家</option>
                 </select>
+                <select id="manual-role">
+                    <option value="朋友">朋友</option>
+                    <option value="親戚">親戚</option>
+                </select>
                 <button class="btn btn-blue" onclick="addManualGuest()">加入</button>
                 <button class="btn btn-grey" onclick="downloadTemplate()" style="margin-left:auto;">範本</button>
                 <button class="btn btn-blue" onclick="document.getElementById('excel-upload').click()">匯入 Excel</button>
@@ -292,8 +297,9 @@
                 overlay.style.height = '100%';
                 overlay.style.backgroundImage = "url('https://www.bespoke-wedding.com/sites/default/files/%E7%A6%AE%E5%8D%A1/logo/Bespoke_logo-Aqua1_long1.png')";
                 overlay.style.backgroundRepeat = "repeat";
-                overlay.style.backgroundSize = "280px";
-                overlay.style.opacity = "0.08"; 
+                overlay.style.backgroundSize = "200px";
+                overlay.style.opacity = "0.18"; 
+                overlay.style.pointerEvents = "none";
                 overlay.style.zIndex = "0";
                 clonedStage.prepend(overlay);
             }
@@ -331,15 +337,15 @@
         return tableWrap;
     }
 
-    function createGuestCard(name, side) {
+    function createGuestCard(name, side, role) {
         const card = document.createElement('div');
         card.className = 'guest-card' + (side === '女家' ? ' female' : '');
-        card.innerHTML = `<strong>${name}</strong>`; 
+        card.innerHTML = `<strong>${name}</strong><small>${side} | ${role}</small>`; 
         return card;
     }
 
-    function renderGuest(name, side) {
-        document.getElementById('guest-list-container').appendChild(createGuestCard(name, side)); 
+    function renderGuest(name, side, role) {
+        document.getElementById('guest-list-container').appendChild(createGuestCard(name, side, role)); 
     }
 
     function handleCreateTables() { if(confirm("確定重新套用佈局？")) { createTables(); saveAllData(); } }
@@ -362,41 +368,47 @@
 
     function saveAllData() {
         const data = { layout: document.getElementById('layout-config').value, perLimit: document.getElementById('per-table-limit').value, unassigned: [], assigned: {}, tableInfo: {} };
-        document.querySelectorAll('#guest-list-container .guest-card').forEach(card => { data.unassigned.push({name: card.innerText, side: card.classList.contains('female')?'女家':'男家'}); });
+        document.querySelectorAll('#guest-list-container .guest-card').forEach(card => { 
+            const info = card.querySelector('small').innerText.split('|');
+            data.unassigned.push({name: card.querySelector('strong').innerText, side: info[0].trim(), role: info[1].trim()}); 
+        });
         document.querySelectorAll('.table-wrap').forEach(table => {
             const tId = table.dataset.tableId;
             data.tableInfo[tId] = { name: table.querySelector('.table-center').innerText, count: table.querySelectorAll('.seat').length };
             table.querySelectorAll('.seat').forEach((seat, idx) => {
                 const card = seat.querySelector('.guest-card');
-                if (card) data.assigned[`${tId}_${idx}`] = {name: card.innerText, side: card.classList.contains('female')?'女家':'男家'};
+                if (card) {
+                    const info = card.querySelector('small').innerText.split('|');
+                    data.assigned[`${tId}_${idx}`] = {name: card.querySelector('strong').innerText, side: info[0].trim(), role: info[1].trim()};
+                }
             });
         });
-        localStorage.setItem('wedding_db_v9', JSON.stringify(data));
+        localStorage.setItem('wedding_db_v10', JSON.stringify(data));
     }
 
     function loadSavedData() {
-        const raw = localStorage.getItem('wedding_db_v9');
+        const raw = localStorage.getItem('wedding_db_v10');
         if (!raw) { createTables(); return; }
         const data = JSON.parse(raw);
         document.getElementById('layout-config').value = data.layout;
         document.getElementById('per-table-limit').value = data.perLimit;
         createTables();
-        data.unassigned.forEach(g => renderGuest(g.name, g.side));
+        data.unassigned.forEach(g => renderGuest(g.name, g.side, g.role));
         for (const key in data.assigned) {
             const [tId, sIdx] = key.split('_');
             const seat = document.querySelector(`[data-table-id="${tId}"]`)?.querySelectorAll('.seat')[sIdx];
-            if (seat) seat.appendChild(createGuestCard(data.assigned[key].name, data.assigned[key].side));
+            if (seat) seat.appendChild(createGuestCard(data.assigned[key].name, data.assigned[key].side, data.assigned[key].role));
         }
     }
 
     function addManualGuest() {
         const n = document.getElementById('manual-name');
         if (!n.value) return;
-        renderGuest(n.value, document.getElementById('manual-side').value); 
+        renderGuest(n.value, document.getElementById('manual-side').value, document.getElementById('manual-role').value); 
         n.value = ''; saveAllData();
     }
 
-    function clearAllStorage() { if(confirm("確定重置所有數據？")) { localStorage.removeItem('wedding_db_v9'); location.reload(); } }
+    function clearAllStorage() { if(confirm("確定重置所有數據？")) { localStorage.removeItem('wedding_db_v10'); location.reload(); } }
 
     function exportSeatingToExcel() {
         const allTables = document.querySelectorAll('.table-wrap');
@@ -405,7 +417,10 @@
             const group = Array.from(allTables).slice(i, i + 5);
             const titleRow = []; group.forEach(t => { titleRow.push(t.querySelector('.table-center').innerText); titleRow.push(""); });
             exportData.push(titleRow);
-            const guestsInGroup = group.map(t => Array.from(t.querySelectorAll('.seat')).map(s => s.querySelector('.guest-card')?.innerText || "(空位)"));
+            const guestsInGroup = group.map(t => Array.from(t.querySelectorAll('.seat')).map(s => {
+                const card = s.querySelector('.guest-card');
+                return card ? `${card.querySelector('strong').innerText} (${card.querySelector('small').innerText})` : "(空位)";
+            }));
             const maxSeats = Math.max(...guestsInGroup.map(g => g.length));
             for (let r = 0; r < maxSeats; r++) {
                 const row = []; guestsInGroup.forEach(list => { row.push(list[r] || ""); row.push(""); });
@@ -419,7 +434,7 @@
     }
 
     function downloadTemplate() {
-        const ws = XLSX.utils.aoa_to_sheet([["姓名", "男家/女家"], ["王小明", "男家"]]);
+        const ws = XLSX.utils.aoa_to_sheet([["姓名", "男家/女家", "分類"], ["王小明", "男家", "朋友"]]);
         const wb = XLSX.utils.book_new(); XLSX.utils.book_append_sheet(wb, ws, "範本");
         XLSX.writeFile(wb, "賓客範本.xlsx");
     }
@@ -429,7 +444,7 @@
         const reader = new FileReader();
         reader.onload = (e) => {
             const json = XLSX.utils.sheet_to_json(XLSX.read(new Uint8Array(e.target.result), {type: 'array'}).Sheets[XLSX.read(new Uint8Array(e.target.result), {type: 'array'}).SheetNames[0]]);
-            json.forEach(item => { if(item['姓名']) renderGuest(item['姓名'], item['男家/女家'] || '男家'); });
+            json.forEach(item => { if(item['姓名']) renderGuest(item['姓名'], item['男家/女家'] || '男家', item['分類'] || '朋友'); });
             saveAllData();
         };
         reader.readAsArrayBuffer(file); input.value = '';
