@@ -42,83 +42,70 @@
             box-sizing: border-box;
             flex-shrink: 0;
         }
-        #header-logo a {
-            display: block;
-            line-height: 0;
-        }
         #header-logo img {
             height: 105px; 
             width: auto;
         }
 
-        /* 功能控制區 */
-        #control-panel {
-            width: 100%;
+        /* --- 整合控制面板 --- */
+        #main-control-wrapper {
             background: white;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            z-index: 100;
+        }
+
+        .master-toggle-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 8px 15px;
+            background: #fdf2f4;
+            cursor: pointer;
+            border-bottom: 1px solid var(--pink-main);
+        }
+
+        .master-toggle-header span {
+            font-size: 13px;
+            font-weight: bold;
+            color: #d63384;
+        }
+
+        #control-panel {
             padding: 5px 10px;
             display: flex;
             flex-direction: column; 
-            gap: 4px;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-            z-index: 100;
+            gap: 6px;
             box-sizing: border-box;
+            transition: max-height 0.3s ease-out, opacity 0.3s ease;
+            max-height: 500px;
+            overflow: hidden;
         }
 
-        .config-wrapper {
-            display: flex;
-            flex-direction: column;
-            gap: 4px;
+        #control-panel.collapsed {
+            max-height: 0;
+            padding: 0;
+            opacity: 0;
         }
 
         .config-section {
-            background: #fdf2f4;
-            padding: 6px 10px;
+            background: #fff;
+            padding: 8px;
             border-radius: 8px;
             display: flex;
             flex-direction: row; 
             gap: 8px;
             align-items: center;
-            border: 1px solid var(--pink-main);
+            border: 1px solid #eee;
             width: 100%; 
             box-sizing: border-box;
             overflow-x: auto;
             white-space: nowrap;
-            transition: max-height 0.3s ease-out, padding 0.3s ease;
-        }
-
-        .config-section.collapsed {
-            max-height: 0;
-            padding-top: 0;
-            padding-bottom: 0;
-            border: none;
-            overflow: hidden;
-            margin: 0;
-        }
-
-        .section-header {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            cursor: pointer;
-            padding: 2px 5px;
-            background: #f9f9f9;
-            border-radius: 4px;
-            margin-bottom: 2px;
-        }
-
-        .toggle-btn {
-            background: none;
-            border: none;
-            color: #d63384;
-            font-weight: bold;
-            font-size: 14px;
-            cursor: pointer;
         }
 
         .config-section label {
             font-size: 11px;
             font-weight: bold;
-            color: #d63384;
+            color: #666;
         }
 
         .config-section input, .config-section select {
@@ -126,9 +113,7 @@
             border: 1px solid #ddd;
             border-radius: 4px;
             font-size: 12px;
-            background: white;
-            min-width: 60px;
-            color: #000000;
+            color: #000;
         }
 
         /* 賓客名單區 */
@@ -140,8 +125,6 @@
             flex-direction: column;
             gap: 5px;
             z-index: 50;
-            width: 100%;
-            box-sizing: border-box;
         }
 
         #list-panel h3 {
@@ -150,7 +133,7 @@
             color: var(--pink-main);
             display: flex;
             justify-content: space-between;
-            align-items: center;
+            cursor: pointer;
         }
 
         #guest-list-container {
@@ -158,24 +141,15 @@
             flex-flow: column wrap; 
             height: 110px; 
             overflow-x: auto; 
-            overflow-y: hidden;
-            gap: 10px;
+            gap: 8px;
             padding: 8px;
             border: 1px dashed var(--pink-main);
             border-radius: 12px;
             background: #fffdfd;
-            box-sizing: border-box;
-            scrollbar-width: thin;
-            scrollbar-color: var(--pink-main) transparent;
-            transition: max-height 0.3s ease;
+            transition: height 0.3s ease;
         }
 
-        #guest-list-container.collapsed {
-            height: 0;
-            padding: 0;
-            border: none;
-            overflow: hidden;
-        }
+        #guest-list-container.collapsed { height: 0; padding: 0; border: none; overflow: hidden; }
 
         .guest-card {
             padding: 4px 8px;
@@ -191,29 +165,14 @@
             flex-direction: column; 
             align-items: center;
             justify-content: center;
-            box-sizing: border-box;
             position: relative;
-            color: #000000 !important;
+            color: #000 !important;
             user-select: none;
         }
 
         .guest-card.female { border-left-color: var(--pink-main); }
-
-        .guest-card strong {
-            display: block;
-            width: 95%;
-            text-align: center;
-            overflow: hidden;
-            text-overflow: ellipsis;
-            white-space: nowrap;
-            color: #000000 !important;
-        }
-
-        .guest-card small { 
-            font-size: 9px; 
-            color: #000000 !important;
-            font-weight: bold;
-        }
+        .guest-card strong { display: block; width: 95%; text-align: center; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+        .guest-card small { font-size: 9px; font-weight: bold; }
 
         .del-btn {
             position: absolute;
@@ -228,20 +187,11 @@
             align-items: center;
             justify-content: center;
             font-size: 10px;
-            cursor: pointer;
             border: 1px solid white;
-            z-index: 2;
         }
 
-        /* 畫布放大縮小控制 */
-        #canvas-wrapper {
-            flex: 1;
-            position: relative;
-            overflow: hidden;
-            display: flex;
-            flex-direction: column;
-            background: #f0f0f0;
-        }
+        /* 畫布與桌位 */
+        #canvas-wrapper { flex: 1; position: relative; overflow: hidden; display: flex; flex-direction: column; background: #f0f0f0; }
 
         #zoom-controls {
             position: absolute;
@@ -254,137 +204,56 @@
         }
 
         .zoom-btn {
-            width: 35px;
-            height: 35px;
-            background: white;
-            border: 2px solid var(--pink-main);
-            border-radius: 8px;
-            font-size: 20px;
-            font-weight: bold;
-            color: var(--pink-main);
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+            width: 35px; height: 35px; background: white; border: 2px solid var(--pink-main);
+            border-radius: 8px; font-size: 20px; color: var(--pink-main); cursor: pointer;
+            display: flex; align-items: center; justify-content: center;
         }
 
-        #canvas {
-            flex: 1;
-            overflow: auto; 
-            padding: 100px;
-            display: block; 
-            width: 100%;
-            height: 100%;
-            box-sizing: border-box;
-        }
+        #canvas { flex: 1; overflow: auto; padding: 80px; box-sizing: border-box; }
 
-        #tables-stage {
-            display: block; 
-            width: fit-content; 
-            min-width: 100%;
-            transform-origin: 0 0; 
-            transition: transform 0.2s ease-out;
-        }
+        #tables-stage { display: block; width: fit-content; min-width: 100%; transform-origin: 0 0; transition: transform 0.2s ease-out; }
 
-        .row-container {
-            display: flex;
-            flex-direction: row; 
-            flex-wrap: nowrap;   
-            gap: 40px; 
-            margin-bottom: 100px;
-            padding: 0 40px;
-            width: fit-content;
-        }
+        .row-container { display: flex; gap: 60px; margin-bottom: 120px; padding: 0 40px; width: fit-content; }
 
-        .table-wrap {
-            position: relative;
-            width: 260px; 
-            height: 260px;
-            flex-shrink: 0; 
-        }
+        .table-wrap { position: relative; width: 300px; height: 300px; flex-shrink: 0; }
 
         .table-center {
-            width: 95px;
-            height: 95px;
-            background: white;
-            border: 6px solid var(--pink-main);
-            border-radius: 50%;
-            position: absolute;
-            top: 50%; 
-            left: 50%;
-            transform: translate(-50%, -50%);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-weight: bold;
-            font-size: 14px;
-            z-index: 10;
-            box-shadow: 0 5px 15px rgba(255,179,193,0.5);
-            cursor: pointer;
-            text-align: center;
-            color: #d63384;
+            width: 100px; height: 100px; background: white; border: 6px solid var(--pink-main);
+            border-radius: 50%; position: absolute; top: 50%; left: 50%;
+            transform: translate(-50%, -50%); display: flex; align-items: center;
+            justify-content: center; font-weight: bold; z-index: 10;
+            box-shadow: 0 5px 15px rgba(255,179,193,0.5); cursor: pointer; color: #d63384;
         }
 
+        /* 優化座位間距與拖拉感應 */
         .seat {
-            width: 58px; 
-            height: 58px; 
-            border-radius: 50%;
-            background: white;
-            border: 2px dashed var(--blue-main);
-            position: absolute;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            z-index: 5;
-            box-shadow: 0 2px 6px rgba(0,0,0,0.08);
-            overflow: hidden;
+            width: 62px; height: 62px; border-radius: 50%; background: white;
+            border: 2px dashed var(--blue-main); position: absolute;
+            display: flex; align-items: center; justify-content: center;
+            z-index: 5; box-shadow: 0 2px 6px rgba(0,0,0,0.08); overflow: hidden;
+            transition: background 0.2s;
         }
 
-        .seat .guest-card {
-            border: none;
-            box-shadow: none;
-            width: 100%;
-            height: 100%;
-            background: transparent;
-            padding: 0;
-            border-radius: 0;
-        }
-        
+        /* 拖拉時的高亮效果 */
+        .seat.sortable-ghost { background: #e3f2fd; border-style: solid; }
+
+        .seat .guest-card { border: none; box-shadow: none; width: 100%; height: 100%; background: transparent; }
         .seat .guest-card .del-btn { display: none; }
 
+        /* Modal */
         #modal-overlay {
-            display: none;
-            position: fixed;
-            top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(0,0,0,0.6);
-            z-index: 1000;
-            justify-content: center;
-            align-items: center;
+            display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.6); z-index: 1000; justify-content: center; align-items: center;
             backdrop-filter: blur(3px);
         }
-        .modal-content {
-            background: white;
-            padding: 25px;
-            border-radius: 20px;
-            width: 300px;
-            display: flex;
-            flex-direction: column;
-            gap: 15px;
-        }
+        .modal-content { background: white; padding: 25px; border-radius: 20px; width: 300px; display: flex; flex-direction: column; gap: 15px; }
 
-        .btn {
-            cursor: pointer;
-            padding: 8px 16px;
-            border: none;
-            border-radius: 15px;
-            font-weight: bold;
-            font-size: 12px;
-        }
+        .btn { cursor: pointer; padding: 8px 16px; border: none; border-radius: 15px; font-weight: bold; font-size: 12px; }
         .btn-pink { background: var(--pink-main); color: white; }
         .btn-blue { background: var(--blue-main); color: white; }
         .btn-grey { background: #eee; color: #444; }
-        .btn-export { background: #4a90e2; color: white; box-shadow: 0 4px 12px rgba(74,144,226,0.4); }
+        .toggle-arrow { font-size: 16px; transition: transform 0.3s; }
+        .collapsed .toggle-arrow { transform: rotate(-180deg); }
 
     </style>
 </head>
@@ -396,47 +265,23 @@
     </a>
 </div>
 
-<div id="modal-overlay">
-    <div class="modal-content">
-        <h4 style="margin:0; color:#d63384;">修改桌位設定</h4>
-        <div>
-            <label style="font-size: 12px; font-weight:bold;">桌號名稱：</label>
-            <input type="text" id="edit-table-name" style="width: 100%; margin-top:5px; padding:8px; color: #000;">
-        </div>
-        <div>
-            <label style="font-size: 12px; font-weight:bold;">座位人數：</label>
-            <input type="number" id="edit-table-seats" style="width: 100%; margin-top:5px; padding:8px; color: #000;">
-        </div>
-        <div style="display: flex; gap: 10px; justify-content: flex-end; margin-top:10px;">
-            <button class="btn btn-grey" onclick="closeModal()">取消</button>
-            <button class="btn btn-pink" id="confirm-edit-btn">確定更新</button>
-        </div>
+<div id="main-control-wrapper">
+    <div class="master-toggle-header" onclick="toggleMasterControl()">
+        <span>🛠️ 設定面板 (佈局 / 新增 / 數據)</span>
+        <span id="master-arrow" class="toggle-arrow">▲</span>
     </div>
-</div>
-
-<div id="control-panel">
-    <div class="config-wrapper">
-        <div class="section-header" onclick="toggleSection('sec-layout', 'btn-layout')">
-            <span style="font-size: 11px; font-weight: bold; color: #d63384;">1. 佈局設定</span>
-            <span id="btn-layout" class="toggle-btn">▲</span>
-        </div>
-        <div id="sec-layout" class="config-section">
-            <label>佈局數:</label>
-            <input type="text" id="layout-config" value="2,3,3">
-            <label>每桌人數:</label>
-            <input type="number" id="per-table-limit" value="12">
+    <div id="control-panel">
+        <div class="config-section">
+            <label>1.佈局:</label>
+            <input type="text" id="layout-config" value="2,3,3" style="width:60px;">
+            <label>人數:</label>
+            <input type="number" id="per-table-limit" value="12" style="width:45px;">
             <button class="btn btn-pink" onclick="handleCreateTables()">套用</button>
             <button class="btn btn-grey" onclick="clearAllStorage()" style="font-size:9px;">重置</button>
         </div>
-    </div>
-
-    <div class="config-wrapper">
-        <div class="section-header" onclick="toggleSection('sec-add', 'btn-add')">
-            <span style="font-size: 11px; font-weight: bold; color: #0056b3;">2. 新增賓客</span>
-            <span id="btn-add" class="toggle-btn">▲</span>
-        </div>
-        <div id="sec-add" class="config-section" style="background: #eef7ff; border-color: var(--blue-main);">
-            <input type="text" id="manual-name" placeholder="姓名">
+        <div class="config-section" style="background: #eef7ff;">
+            <label>2.新增:</label>
+            <input type="text" id="manual-name" placeholder="姓名" style="width:80px;">
             <select id="manual-side">
                 <option value="男家">男家</option>
                 <option value="女家">女家</option>
@@ -444,18 +289,11 @@
             <select id="manual-role">
                 <option value="朋友">朋友</option>
                 <option value="親戚">親戚</option>
-                <option value="同事">同事</option>
             </select>
             <button class="btn btn-blue" onclick="addManualGuest()">加入</button>
         </div>
-    </div>
-
-    <div class="config-wrapper">
-        <div class="section-header" onclick="toggleSection('sec-data', 'btn-data')">
-            <span style="font-size: 11px; font-weight: bold; color: #444;">3. 數據管理</span>
-            <span id="btn-data" class="toggle-btn">▲</span>
-        </div>
-        <div id="sec-data" class="config-section">
+        <div class="config-section">
+            <label>3.數據:</label>
             <button class="btn btn-grey" onclick="downloadTemplate()">範本</button>
             <button class="btn btn-blue" onclick="document.getElementById('excel-upload').click()">匯入</button>
             <input type="file" id="excel-upload" hidden accept=".xlsx, .xls" onchange="handleImport(this)">
@@ -465,8 +303,8 @@
 
 <div id="list-panel">
     <h3 onclick="toggleGuestList()">
-        <span>💕 待分配賓客名單 (左右滑動)</span>
-        <span id="btn-guest" class="toggle-btn">▲</span>
+        <span>💕 待分配賓客名單</span>
+        <span id="btn-guest" class="toggle-arrow">▲</span>
     </h3>
     <div id="guest-list-container"></div>
 </div>
@@ -475,17 +313,43 @@
     <div id="zoom-controls">
         <button class="zoom-btn" onclick="adjustZoom(0.1)">+</button>
         <button class="zoom-btn" onclick="adjustZoom(-0.1)">-</button>
-        <button class="zoom-btn" onclick="resetZoom()" style="font-size: 12px;">Reset</button>
-        <button class="btn btn-export" onclick="exportSeatingToExcel()" style="margin-top:10px;">📊 匯出</button>
+        <button class="zoom-btn" onclick="resetZoom()" style="font-size: 10px;">Reset</button>
+        <button class="btn btn-blue" onclick="exportSeatingToExcel()" style="margin-top:10px;">📊 匯出</button>
     </div>
     <div id="canvas">
         <div id="tables-stage"></div>
     </div>
 </div>
 
+<div id="modal-overlay">
+    <div class="modal-content">
+        <h4 style="margin:0; color:#d63384;">修改桌位設定</h4>
+        <input type="text" id="edit-table-name" placeholder="桌號名稱" style="padding:8px;">
+        <input type="number" id="edit-table-seats" placeholder="座位人數" style="padding:8px;">
+        <div style="display: flex; gap: 10px; justify-content: flex-end;">
+            <button class="btn btn-grey" onclick="closeModal()">取消</button>
+            <button class="btn btn-pink" id="confirm-edit-btn">確定更新</button>
+        </div>
+    </div>
+</div>
+
 <script>
     let currentEditingTable = null;
     let currentZoom = 1.0;
+
+    function toggleMasterControl() {
+        const panel = document.getElementById('control-panel');
+        const header = document.querySelector('.master-toggle-header');
+        panel.classList.toggle('collapsed');
+        header.classList.toggle('collapsed');
+    }
+
+    function toggleGuestList() {
+        const list = document.getElementById('guest-list-container');
+        const header = document.querySelector('#list-panel h3');
+        list.classList.toggle('collapsed');
+        header.classList.toggle('collapsed');
+    }
 
     function adjustZoom(delta) {
         currentZoom = Math.max(0.3, Math.min(2.0, currentZoom + delta));
@@ -497,25 +361,12 @@
         document.getElementById('tables-stage').style.transform = `scale(1)`;
     }
 
-    function toggleSection(secId, btnId) {
-        const sec = document.getElementById(secId);
-        const btn = document.getElementById(btnId);
-        sec.classList.toggle('collapsed');
-        btn.innerText = sec.classList.contains('collapsed') ? '▼' : '▲';
-    }
-
-    function toggleGuestList() {
-        const list = document.getElementById('guest-list-container');
-        const btn = document.getElementById('btn-guest');
-        list.classList.toggle('collapsed');
-        btn.innerText = list.classList.contains('collapsed') ? '▼' : '▲';
-    }
-
     const sortableOptions = {
         group: 'wedding',
         animation: 150,
-        delay: 50,
-        touchStartThreshold: 5,
+        fallbackOnBody: true,
+        swapThreshold: 0.65,
+        dragClass: "sortable-drag",
         onEnd: saveAllData 
     };
 
@@ -525,9 +376,7 @@
         const data = {
             layout: document.getElementById('layout-config').value,
             perLimit: document.getElementById('per-table-limit').value,
-            unassigned: [],
-            assigned: {},
-            tableInfo: {}
+            unassigned: [], assigned: {}, tableInfo: {}
         };
         document.querySelectorAll('#guest-list-container .guest-card').forEach(card => {
             data.unassigned.push(getGuestDataFromCard(card));
@@ -543,7 +392,7 @@
                 if (card) data.assigned[`${tableId}_${index}`] = getGuestDataFromCard(card);
             });
         });
-        localStorage.setItem('wedding_db_pc_fixed_v5', JSON.stringify(data));
+        localStorage.setItem('wedding_db_v6', JSON.stringify(data));
     }
 
     function getGuestDataFromCard(card) {
@@ -552,67 +401,6 @@
             side: card.classList.contains('female') ? '女家' : '男家',
             role: card.querySelector('small').innerText.split('|')[1] || '朋友'
         };
-    }
-
-    function loadSavedData() {
-        const raw = localStorage.getItem('wedding_db_pc_fixed_v5');
-        if (!raw) { createTables(); return; }
-        const data = JSON.parse(raw);
-        document.getElementById('layout-config').value = data.layout;
-        document.getElementById('per-table-limit').value = data.perLimit;
-        
-        const stage = document.getElementById('tables-stage');
-        stage.innerHTML = '';
-        const layout = data.layout.split(',').map(item => parseInt(item.trim()) || 0);
-        
-        layout.forEach((count, rowIndex) => {
-            if (count <= 0) return;
-            const rowDiv = document.createElement('div');
-            rowDiv.className = 'row-container';
-            for (let i = 1; i <= count; i++) {
-                const tId = `T-${rowIndex + 1}-${i}`;
-                const tInfo = (data.tableInfo && data.tableInfo[tId]) ? data.tableInfo[tId] : { name: `第 ${rowIndex + 1}-${i} 桌`, count: parseInt(data.perLimit) };
-                rowDiv.appendChild(renderSingleTable(tId, tInfo.name, tInfo.count)); 
-            }
-            stage.appendChild(rowDiv); 
-        });
-
-        data.unassigned.forEach(g => renderGuest(g.name, g.side, g.role));
-        for (const key in data.assigned) {
-            const [tId, sIdx] = key.split('_');
-            const table = document.querySelector(`[data-table-id="${tId}"]`);
-            if (table) {
-                const seat = table.querySelectorAll('.seat')[sIdx];
-                if (seat) seat.appendChild(createGuestCard(data.assigned[key].name, data.assigned[key].side, data.assigned[key].role));
-            }
-        }
-    }
-
-    function clearAllStorage() {
-        if(confirm("確定重置所有排座記錄嗎？")) {
-            localStorage.removeItem('wedding_db_pc_fixed_v5');
-            location.reload();
-        }
-    }
-
-    function handleCreateTables() {
-        if(confirm("套用佈局會重置桌子安排，確定嗎？")) { createTables(); saveAllData(); }
-    }
-
-    function createTables() {
-        const stage = document.getElementById('tables-stage');
-        stage.innerHTML = ''; 
-        const layout = document.getElementById('layout-config').value.split(',').map(item => parseInt(item.trim()) || 0);
-        const defaultSeatCount = parseInt(document.getElementById('per-table-limit').value) || 12;
-        layout.forEach((count, rowIndex) => {
-            if (count <= 0) return;
-            const rowDiv = document.createElement('div');
-            rowDiv.className = 'row-container';
-            for (let i = 1; i <= count; i++) {
-                rowDiv.appendChild(renderSingleTable(`T-${rowIndex + 1}-${i}`, `第 ${rowIndex + 1}-${i} 桌`, defaultSeatCount)); 
-            }
-            stage.appendChild(rowDiv); 
-        });
     }
 
     function renderSingleTable(id, name, seatCount) {
@@ -624,20 +412,27 @@
         center.innerText = name;
         center.onclick = function() { openModal(tableWrap, name, seatCount); };
         tableWrap.appendChild(center);
+
+        // 加大半徑確保座位間有小距離
+        const radius = 115; 
         for (let j = 0; j < seatCount; j++) {
             const seat = document.createElement('div');
             seat.className = 'seat';
             const angle = (j / seatCount) * 2 * Math.PI - Math.PI / 2;
-            const x = 130 + 100 * Math.cos(angle) - 29;
-            const y = 130 + 100 * Math.sin(angle) - 29; 
+            const x = 150 + radius * Math.cos(angle) - 31;
+            const y = 150 + radius * Math.sin(angle) - 31; 
             seat.style.left = x + 'px'; seat.style.top = y + 'px'; 
-            new Sortable(seat, { ...sortableOptions, onAdd: (evt) => {
-                if (evt.to.children.length > 1) { 
-                    document.getElementById('guest-list-container').appendChild(evt.item); 
-                    alert('座位已滿！'); 
+            
+            new Sortable(seat, { 
+                ...sortableOptions, 
+                onAdd: (evt) => {
+                    if (evt.to.children.length > 1) { 
+                        document.getElementById('guest-list-container').appendChild(evt.item); 
+                        alert('此位置已有賓客！'); 
+                    }
+                    saveAllData();
                 }
-                saveAllData();
-            }});
+            });
             tableWrap.appendChild(seat); 
         }
         return tableWrap;
@@ -665,6 +460,26 @@
         n.value = ''; saveAllData();
     }
 
+    function handleCreateTables() {
+        if(confirm("套用新佈局會清空目前的桌位安排，確定嗎？")) { createTables(); saveAllData(); }
+    }
+
+    function createTables() {
+        const stage = document.getElementById('tables-stage');
+        stage.innerHTML = ''; 
+        const layout = document.getElementById('layout-config').value.split(',').map(item => parseInt(item.trim()) || 0);
+        const defaultSeatCount = parseInt(document.getElementById('per-table-limit').value) || 12;
+        layout.forEach((count, rowIndex) => {
+            if (count <= 0) return;
+            const rowDiv = document.createElement('div');
+            rowDiv.className = 'row-container';
+            for (let i = 1; i <= count; i++) {
+                rowDiv.appendChild(renderSingleTable(`T-${rowIndex + 1}-${i}`, `第 ${rowIndex + 1}-${i} 桌`, defaultSeatCount)); 
+            }
+            stage.appendChild(rowDiv); 
+        });
+    }
+
     function openModal(tableWrap, name, count) {
         currentEditingTable = tableWrap;
         document.getElementById('edit-table-name').value = name;
@@ -674,44 +489,62 @@
 
     function closeModal() { document.getElementById('modal-overlay').style.display = 'none'; }
 
-    // --- 關鍵修正：修改桌位邏輯 ---
     document.getElementById('confirm-edit-btn').onclick = function() {
         if (!currentEditingTable) return;
-        
-        const newSeatCount = parseInt(document.getElementById('edit-table-seats').value) || 12;
-        const newTableName = document.getElementById('edit-table-name').value;
-        const guestListContainer = document.getElementById('guest-list-container');
-        
-        // 1. 檢查該桌是否有賓客
-        const existingGuests = currentEditingTable.querySelectorAll('.guest-card');
-        if (existingGuests.length > 0) {
-            const confirmMove = confirm(`該桌已有 ${existingGuests.length} 位安排好的賓客。\n修改座位人數將會自動把他們移回「待分配賓客名單」，確定嗎？`);
-            if (!confirmMove) return;
-
-            // 2. 將賓客移回名單
-            existingGuests.forEach(card => {
-                // 重新包裝成可拖拽的卡片（恢復刪除按鈕功能）
-                const guestData = getGuestDataFromCard(card);
-                renderGuest(guestData.name, guestData.side, guestData.role);
+        const newCount = parseInt(document.getElementById('edit-table-seats').value) || 12;
+        const guests = currentEditingTable.querySelectorAll('.guest-card');
+        if (guests.length > 0) {
+            if (!confirm(`修改人數會將該桌 ${guests.length} 位賓客移回待分配名單，確定嗎？`)) return;
+            guests.forEach(card => {
+                const d = getGuestDataFromCard(card);
+                renderGuest(d.name, d.side, d.role);
             });
         }
-
-        // 3. 重新渲染該桌位
-        const newWrap = renderSingleTable(currentEditingTable.dataset.tableId, newTableName, newSeatCount);
+        const newWrap = renderSingleTable(currentEditingTable.dataset.tableId, document.getElementById('edit-table-name').value, newCount);
         currentEditingTable.parentNode.replaceChild(newWrap, currentEditingTable);
-        
-        closeModal(); 
-        saveAllData();
+        closeModal(); saveAllData();
     };
+
+    function loadSavedData() {
+        const raw = localStorage.getItem('wedding_db_v6');
+        if (!raw) { createTables(); return; }
+        const data = JSON.parse(raw);
+        document.getElementById('layout-config').value = data.layout;
+        document.getElementById('per-table-limit').value = data.perLimit;
+        const stage = document.getElementById('tables-stage');
+        stage.innerHTML = '';
+        const layout = data.layout.split(',').map(item => parseInt(item.trim()) || 0);
+        layout.forEach((count, rowIndex) => {
+            const rowDiv = document.createElement('div');
+            rowDiv.className = 'row-container';
+            for (let i = 1; i <= count; i++) {
+                const tId = `T-${rowIndex+1}-${i}`;
+                const tInfo = data.tableInfo[tId] || { name: `第 ${rowIndex+1}-${i} 桌`, count: parseInt(data.perLimit) };
+                rowDiv.appendChild(renderSingleTable(tId, tInfo.name, tInfo.count));
+            }
+            stage.appendChild(rowDiv);
+        });
+        data.unassigned.forEach(g => renderGuest(g.name, g.side, g.role));
+        for (const key in data.assigned) {
+            const [tId, sIdx] = key.split('_');
+            const table = document.querySelector(`[data-table-id="${tId}"]`);
+            if (table) {
+                const seat = table.querySelectorAll('.seat')[sIdx];
+                if (seat) seat.appendChild(createGuestCard(data.assigned[key].name, data.assigned[key].side, data.assigned[key].role));
+            }
+        }
+    }
+
+    function clearAllStorage() { if(confirm("確定重置所有排座記錄嗎？")) { localStorage.removeItem('wedding_db_v6'); location.reload(); } }
 
     function exportSeatingToExcel() {
         const allTables = document.querySelectorAll('.table-wrap');
         const exportData = [];
         for (let i = 0; i < allTables.length; i += 5) {
             const group = Array.from(allTables).slice(i, i + 5);
-            const titleRow = []; group.forEach(table => { titleRow.push(table.querySelector('.table-center').innerText); titleRow.push(""); });
+            const titleRow = []; group.forEach(t => { titleRow.push(t.querySelector('.table-center').innerText); titleRow.push(""); });
             exportData.push(titleRow);
-            const guestsInGroup = group.map(table => Array.from(table.querySelectorAll('.seat')).map(s => {
+            const guestsInGroup = group.map(t => Array.from(t.querySelectorAll('.seat')).map(s => {
                 const n = s.querySelector('.guest-card strong');
                 return n ? `${n.innerText} (${s.querySelector('.guest-card small').innerText})` : "(空位)";
             }));
@@ -720,7 +553,7 @@
                 const row = []; guestsInGroup.forEach(list => { row.push(list[r] || ""); row.push(""); });
                 exportData.push(row);
             }
-            exportData.push([]); exportData.push([]);
+            exportData.push([]);
         }
         const ws = XLSX.utils.aoa_to_sheet(exportData);
         const wb = XLSX.utils.book_new(); XLSX.utils.book_append_sheet(wb, ws, "座位表");
