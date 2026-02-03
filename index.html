@@ -212,14 +212,14 @@
 
         #canvas { flex: 1; overflow: auto; padding: 80px; box-sizing: border-box; }
 
-        /* 網站內的桌位圖背景保持乾淨 */
+        /* 網頁內部桌位圖：純白色背景，無暗花 */
         #tables-stage { 
             display: block; 
             width: fit-content; 
             min-width: 100%; 
             transform-origin: 0 0; 
             transition: transform 0.2s ease-out; 
-            background-color: #ffffff;
+            background-color: #ffffff; 
             position: relative;
             padding: 40px;
         }
@@ -371,12 +371,13 @@
         document.getElementById('tables-stage').style.transform = `scale(1)`;
     }
 
-    // --- 關鍵修正：匯出圖片時動態加上暗花背景 ---
+    // --- 關鍵修正：匯出圖片時動態加上粉色背景與暗花 ---
     function exportToImage() {
         const stage = document.getElementById('tables-stage');
         const originalTransform = stage.style.transform;
+        const originalBgColor = stage.style.backgroundColor;
         
-        // 建立一個臨時遮罩元素來承載暗花，避免直接改動原 stage 的樣式影響排版
+        // 1. 動態建立暗花遮罩層
         const watermark = document.createElement('div');
         watermark.style.position = 'absolute';
         watermark.style.top = '0';
@@ -386,17 +387,18 @@
         watermark.style.backgroundImage = "url('https://www.bespoke-wedding.com/sites/default/files/%E7%A6%AE%E5%8D%A1/logo/Bespoke_logo-Aqua1_long1.png')";
         watermark.style.backgroundRepeat = 'repeat';
         watermark.style.backgroundSize = '300px';
-        watermark.style.opacity = '0.08';
+        watermark.style.opacity = '0.1'; // 增加一點透明度以在粉底上更清晰
         watermark.style.filter = 'grayscale(1)';
         watermark.style.zIndex = '0';
+        
+        // 2. 匯出前臨時變更背景與結構
         stage.prepend(watermark);
-
-        // 匯出前重置縮放
-        stage.style.transform = "scale(1)";
+        stage.style.backgroundColor = "#fff5f7"; // 背景變粉紅色
+        stage.style.transform = "scale(1)"; // 重置縮放確保清晰
         
         html2canvas(stage, {
             useCORS: true,
-            backgroundColor: "#ffffff",
+            backgroundColor: "#fff5f7", // 強制畫布背景色
             scale: 2
         }).then(canvas => {
             const link = document.createElement('a');
@@ -404,8 +406,9 @@
             link.href = canvas.toDataURL("image/png");
             link.click();
             
-            // 匯出後還原樣式：移除暗花，還原縮放
+            // 3. 還原網頁介面樣式
             stage.removeChild(watermark);
+            stage.style.backgroundColor = originalBgColor;
             stage.style.transform = originalTransform;
         });
     }
