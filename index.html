@@ -6,6 +6,7 @@
     <title>夢幻婚禮排座小幫手 (最終修正版)</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/Sortable/1.15.0/Sortable.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
     <style>
         :root {
             --pink-bg: #fff5f7;
@@ -211,9 +212,10 @@
 
         #canvas { flex: 1; overflow: auto; padding: 80px; box-sizing: border-box; }
 
-        #tables-stage { display: block; width: fit-content; min-width: 100%; transform-origin: 0 0; transition: transform 0.2s ease-out; }
+        #tables-stage { display: block; width: fit-content; min-width: 100%; transform-origin: 0 0; transition: transform 0.2s ease-out; background: transparent; }
 
-        .row-container { display: flex; gap: 60px; margin-bottom: 120px; padding: 0 40px; width: fit-content; }
+        /* 修正行距：margin-bottom 從 120px 縮小至約 60px (一個座位的距離) */
+        .row-container { display: flex; gap: 60px; margin-bottom: 60px; padding: 0 40px; width: fit-content; }
 
         .table-wrap { position: relative; width: 300px; height: 300px; flex-shrink: 0; }
 
@@ -225,7 +227,6 @@
             box-shadow: 0 5px 15px rgba(255,179,193,0.5); cursor: pointer; color: #d63384;
         }
 
-        /* 優化座位間距與拖拉感應 */
         .seat {
             width: 62px; height: 62px; border-radius: 50%; background: white;
             border: 2px dashed var(--blue-main); position: absolute;
@@ -234,9 +235,7 @@
             transition: background 0.2s;
         }
 
-        /* 拖拉時的高亮效果 */
         .seat.sortable-ghost { background: #e3f2fd; border-style: solid; }
-
         .seat .guest-card { border: none; box-shadow: none; width: 100%; height: 100%; background: transparent; }
         .seat .guest-card .del-btn { display: none; }
 
@@ -252,6 +251,7 @@
         .btn-pink { background: var(--pink-main); color: white; }
         .btn-blue { background: var(--blue-main); color: white; }
         .btn-grey { background: #eee; color: #444; }
+        .btn-image { background: #52c41a; color: white; margin-top: 10px; }
         .toggle-arrow { font-size: 16px; transition: transform 0.3s; }
         .collapsed .toggle-arrow { transform: rotate(-180deg); }
 
@@ -314,7 +314,8 @@
         <button class="zoom-btn" onclick="adjustZoom(0.1)">+</button>
         <button class="zoom-btn" onclick="adjustZoom(-0.1)">-</button>
         <button class="zoom-btn" onclick="resetZoom()" style="font-size: 10px;">Reset</button>
-        <button class="btn btn-blue" onclick="exportSeatingToExcel()" style="margin-top:10px;">📊 匯出</button>
+        <button class="btn btn-blue" onclick="exportSeatingToExcel()" style="margin-top:10px;">📊 匯出 Excel</button>
+        <button class="btn btn-image" onclick="exportToImage()">🖼️ 匯出圖片</button>
     </div>
     <div id="canvas">
         <div id="tables-stage"></div>
@@ -324,8 +325,8 @@
 <div id="modal-overlay">
     <div class="modal-content">
         <h4 style="margin:0; color:#d63384;">修改桌位設定</h4>
-        <input type="text" id="edit-table-name" placeholder="桌號名稱" style="padding:8px;">
-        <input type="number" id="edit-table-seats" placeholder="座位人數" style="padding:8px;">
+        <input type="text" id="edit-table-name" placeholder="桌號名稱" style="padding:8px; border:1px solid #ddd; border-radius:8px;">
+        <input type="number" id="edit-table-seats" placeholder="座位人數" style="padding:8px; border:1px solid #ddd; border-radius:8px;">
         <div style="display: flex; gap: 10px; justify-content: flex-end;">
             <button class="btn btn-grey" onclick="closeModal()">取消</button>
             <button class="btn btn-pink" id="confirm-edit-btn">確定更新</button>
@@ -352,7 +353,7 @@
     }
 
     function adjustZoom(delta) {
-        currentZoom = Math.max(0.3, Math.min(2.0, currentZoom + delta));
+        currentZoom = Math.max(0.1, Math.min(2.0, currentZoom + delta));
         document.getElementById('tables-stage').style.transform = `scale(${currentZoom})`;
     }
 
@@ -361,12 +362,31 @@
         document.getElementById('tables-stage').style.transform = `scale(1)`;
     }
 
+    // 匯出圖片功能
+    function exportToImage() {
+        const stage = document.getElementById('tables-stage');
+        // 匯出前暫時重置縮放以確保清晰度
+        const originalTransform = stage.style.transform;
+        stage.style.transform = "scale(1)";
+        
+        html2canvas(stage, {
+            useCORS: true,
+            backgroundColor: "#fff5f7",
+            scale: 2 // 提升清晰度
+        }).then(canvas => {
+            const link = document.createElement('a');
+            link.download = `婚禮座位表_${new Date().getTime()}.png`;
+            link.href = canvas.toDataURL();
+            link.click();
+            stage.style.transform = originalTransform;
+        });
+    }
+
     const sortableOptions = {
         group: 'wedding',
         animation: 150,
         fallbackOnBody: true,
         swapThreshold: 0.65,
-        dragClass: "sortable-drag",
         onEnd: saveAllData 
     };
 
@@ -392,7 +412,7 @@
                 if (card) data.assigned[`${tableId}_${index}`] = getGuestDataFromCard(card);
             });
         });
-        localStorage.setItem('wedding_db_v6', JSON.stringify(data));
+        localStorage.setItem('wedding_db_v7', JSON.stringify(data));
     }
 
     function getGuestDataFromCard(card) {
@@ -413,7 +433,6 @@
         center.onclick = function() { openModal(tableWrap, name, seatCount); };
         tableWrap.appendChild(center);
 
-        // 加大半徑確保座位間有小距離
         const radius = 115; 
         for (let j = 0; j < seatCount; j++) {
             const seat = document.createElement('div');
@@ -506,7 +525,7 @@
     };
 
     function loadSavedData() {
-        const raw = localStorage.getItem('wedding_db_v6');
+        const raw = localStorage.getItem('wedding_db_v7');
         if (!raw) { createTables(); return; }
         const data = JSON.parse(raw);
         document.getElementById('layout-config').value = data.layout;
@@ -535,7 +554,7 @@
         }
     }
 
-    function clearAllStorage() { if(confirm("確定重置所有排座記錄嗎？")) { localStorage.removeItem('wedding_db_v6'); location.reload(); } }
+    function clearAllStorage() { if(confirm("確定重置所有排座記錄嗎？")) { localStorage.removeItem('wedding_db_v7'); location.reload(); } }
 
     function exportSeatingToExcel() {
         const allTables = document.querySelectorAll('.table-wrap');
