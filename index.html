@@ -212,14 +212,14 @@
 
         #canvas { flex: 1; overflow: auto; padding: 80px; box-sizing: border-box; }
 
-        /* 網頁內部桌位圖：純白色背景，無暗花 */
+        /* --- 網頁內部：透明背景，無暗花 --- */
         #tables-stage { 
             display: block; 
             width: fit-content; 
             min-width: 100%; 
             transform-origin: 0 0; 
             transition: transform 0.2s ease-out; 
-            background-color: #ffffff; 
+            background-color: transparent; 
             position: relative;
             padding: 40px;
         }
@@ -331,18 +331,6 @@
     </div>
 </div>
 
-<div id="modal-overlay">
-    <div class="modal-content">
-        <h4 style="margin:0; color:#d63384;">修改桌位設定</h4>
-        <input type="text" id="edit-table-name" placeholder="桌號名稱" style="padding:8px; border:1px solid #ddd; border-radius:8px;">
-        <input type="number" id="edit-table-seats" placeholder="座位人數" style="padding:8px; border:1px solid #ddd; border-radius:8px;">
-        <div style="display: flex; gap: 10px; justify-content: flex-end;">
-            <button class="btn btn-grey" onclick="closeModal()">取消</button>
-            <button class="btn btn-pink" id="confirm-edit-btn">確定更新</button>
-        </div>
-    </div>
-</div>
-
 <script>
     let currentEditingTable = null;
     let currentZoom = 1.0;
@@ -371,44 +359,45 @@
         document.getElementById('tables-stage').style.transform = `scale(1)`;
     }
 
-    // --- 關鍵修正：匯出圖片時動態加上粉色背景與暗花 ---
+    // --- 修正後的匯出功能：僅在匯出的副本中添加背景與暗花 ---
     function exportToImage() {
         const stage = document.getElementById('tables-stage');
         const originalTransform = stage.style.transform;
-        const originalBgColor = stage.style.backgroundColor;
-        
-        // 1. 動態建立暗花遮罩層
-        const watermark = document.createElement('div');
-        watermark.style.position = 'absolute';
-        watermark.style.top = '0';
-        watermark.style.left = '0';
-        watermark.style.width = '100%';
-        watermark.style.height = '100%';
-        watermark.style.backgroundImage = "url('https://www.bespoke-wedding.com/sites/default/files/%E7%A6%AE%E5%8D%A1/logo/Bespoke_logo-Aqua1_long1.png')";
-        watermark.style.backgroundRepeat = 'repeat';
-        watermark.style.backgroundSize = '300px';
-        watermark.style.opacity = '0.1'; // 增加一點透明度以在粉底上更清晰
-        watermark.style.filter = 'grayscale(1)';
-        watermark.style.zIndex = '0';
-        
-        // 2. 匯出前臨時變更背景與結構
-        stage.prepend(watermark);
-        stage.style.backgroundColor = "#fff5f7"; // 背景變粉紅色
-        stage.style.transform = "scale(1)"; // 重置縮放確保清晰
-        
+        stage.style.transform = "scale(1)"; 
+
         html2canvas(stage, {
             useCORS: true,
-            backgroundColor: "#fff5f7", // 強制畫布背景色
-            scale: 2
+            scale: 2,
+            backgroundColor: "#fff5f7", // 匯出圖片背景色為粉紅
+            onclone: (clonedDoc) => {
+                const clonedStage = clonedDoc.getElementById('tables-stage');
+                // 在匯出的副本中添加粉紅背景與 Logo 暗花
+                clonedStage.style.backgroundColor = "#fff5f7";
+                clonedStage.style.backgroundImage = "url('https://www.bespoke-wedding.com/sites/default/files/%E7%A6%AE%E5%8D%A1/logo/Bespoke_logo-Aqua1_long1.png')";
+                clonedStage.style.backgroundRepeat = "repeat";
+                clonedStage.style.backgroundSize = "300px";
+                clonedStage.style.backgroundBlendMode = "multiply";
+                
+                // 模擬暗花效果 (低透明度 Logo 層)
+                const overlay = clonedDoc.createElement('div');
+                overlay.style.position = 'absolute';
+                overlay.style.top = '0';
+                overlay.style.left = '0';
+                overlay.style.width = '100%';
+                overlay.style.height = '100%';
+                overlay.style.backgroundImage = clonedStage.style.backgroundImage;
+                overlay.style.backgroundRepeat = "repeat";
+                overlay.style.backgroundSize = "300px";
+                overlay.style.opacity = "0.08"; 
+                overlay.style.pointerEvents = "none";
+                overlay.style.zIndex = "0";
+                clonedStage.prepend(overlay);
+            }
         }).then(canvas => {
             const link = document.createElement('a');
             link.download = `婚禮座位表_${new Date().getTime()}.png`;
             link.href = canvas.toDataURL("image/png");
             link.click();
-            
-            // 3. 還原網頁介面樣式
-            stage.removeChild(watermark);
-            stage.style.backgroundColor = originalBgColor;
             stage.style.transform = originalTransform;
         });
     }
@@ -629,6 +618,18 @@
 
     window.onload = loadSavedData;
 </script>
+
+<div id="modal-overlay">
+    <div class="modal-content">
+        <h4 style="margin:0; color:#d63384;">修改桌位設定</h4>
+        <input type="text" id="edit-table-name" placeholder="桌號名稱" style="padding:8px; border:1px solid #ddd; border-radius:8px;">
+        <input type="number" id="edit-table-seats" placeholder="座位人數" style="padding:8px; border:1px solid #ddd; border-radius:8px;">
+        <div style="display: flex; gap: 10px; justify-content: flex-end;">
+            <button class="btn btn-grey" onclick="closeModal()">取消</button>
+            <button class="btn btn-pink" id="confirm-edit-btn">確定更新</button>
+        </div>
+    </div>
+</div>
 
 </body>
 </html>
