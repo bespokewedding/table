@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>夢幻婚禮排座小幫手 (暗花強制顯示版)</title>
+    <title>夢幻婚禮排座小幫手 (收起按鈕修正版)</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/Sortable/1.15.0/Sortable.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
@@ -36,10 +36,13 @@
         .master-toggle-header {
             display: flex; align-items: center; justify-content: space-between;
             padding: 5px 15px; background: #fdf2f4; border-bottom: 1px solid var(--pink-main);
+            cursor: pointer;
         }
         .master-toggle-header span { font-size: 11px; font-weight: bold; color: #d63384; }
+        .toggle-btn-text { font-size: 10px; color: #666; background: #fff; padding: 1px 5px; border-radius: 4px; border: 1px solid #ddd; }
 
         #control-panel { padding: 4px 10px; display: flex; flex-direction: column; gap: 4px; }
+        #control-panel.collapsed { display: none; }
 
         .config-section {
             background: #fff; padding: 4px 8px; border-radius: 6px;
@@ -138,7 +141,10 @@
 
 <div id="top-section">
     <div id="main-control-wrapper">
-        <div class="master-toggle-header"><span>🛠️ 設定與數據</span></div>
+        <div class="master-toggle-header" onclick="toggleControlPanel()">
+            <span>🛠️ 設定與數據</span>
+            <div class="toggle-btn-text" id="toggle-txt">收起</div>
+        </div>
         <div id="control-panel">
             <div class="config-section">
                 <label>佈局:</label><input type="text" id="layout-config" value="2,3,3" style="width:45px;">
@@ -149,7 +155,11 @@
             <div class="config-section" style="background: #eef7ff;">
                 <label>新增:</label><input type="text" id="manual-name" placeholder="姓名" style="width:65px;">
                 <select id="manual-side"><option value="男家">男家</option><option value="女家">女家</option></select>
-                <select id="manual-role"><option value="朋友">朋友</option><option value="親戚">親戚</option></select><option value="同事">同事</option></select>
+                <select id="manual-role">
+                    <option value="朋友">朋友</option>
+                    <option value="親戚">親戚</option>
+                    <option value="同事">同事</option>
+                </select>
                 <button class="btn btn-blue" onclick="addManualGuest()">加入</button>
                 <button class="btn btn-grey" onclick="downloadTemplate()" style="margin-left:auto;">範本</button>
                 <button class="btn btn-blue" onclick="document.getElementById('excel-upload').click()">匯入</button>
@@ -191,43 +201,43 @@
     let currentZoom = 1.0;
     let currentEditingTable = null;
 
+    // --- 修正：切換面板功能 ---
+    function toggleControlPanel() {
+        const panel = document.getElementById('control-panel');
+        const txt = document.getElementById('toggle-txt');
+        if (panel.classList.contains('collapsed')) {
+            panel.classList.remove('collapsed');
+            txt.innerText = '收起';
+        } else {
+            panel.classList.add('collapsed');
+            txt.innerText = '展開';
+        }
+    }
+
     function adjustZoom(delta) {
         currentZoom = Math.max(0.1, Math.min(2.0, currentZoom + delta));
         document.getElementById('tables-stage').style.transform = `scale(${currentZoom})`;
     }
 
-    // --- 強化版匯出功能 ---
     function exportToImage() {
         const stage = document.getElementById('tables-stage');
         const originalTransform = stage.style.transform;
-        
-        // 1. 準備：恢復原始比例以便正確擷取
         stage.style.transform = "scale(1)"; 
 
         html2canvas(stage, {
-            useCORS: true,           // 關鍵：允許跨域圖片
-            allowTaint: true,       // 關鍵：允許污染畫布（如果 CORS 失敗則嘗試此法）
-            scale: 2,               // 提高解析度
+            useCORS: true,
+            allowTaint: true,
+            scale: 2,
             backgroundColor: "#fff5f7",
             onclone: (clonedDoc) => {
                 const clonedStage = clonedDoc.getElementById('tables-stage');
-                
-                // 創建一個暗花容器層，確保置於最底
                 const overlay = clonedDoc.createElement('div');
-                overlay.id = "watermark-overlay";
                 overlay.style.cssText = `
-                    position: absolute;
-                    top: 0; left: 0;
-                    width: 100%; height: 100%;
+                    position: absolute; top: 0; left: 0; width: 100%; height: 100%;
                     background-image: url('https://www.bespoke-wedding.com/sites/default/files/%E7%A6%AE%E5%8D%A1/logo/Bespoke_logo-Aqua1_long1.png');
-                    background-repeat: repeat;
-                    background-size: 180px;
-                    opacity: 0.45; /* 再次提高透明度 */
-                    z-index: -1;
-                    pointer-events: none;
+                    background-repeat: repeat; background-size: 180px; opacity: 0.45; z-index: -1; pointer-events: none;
                 `;
                 
-                // 備用方案：如果圖片真的加載不了，加入文字暗花作為保障
                 const textBack = clonedDoc.createElement('div');
                 textBack.style.cssText = `
                     position: absolute; top: 0; left: 0; width: 100%; height: 100%;
@@ -241,7 +251,6 @@
                     span.style.transform = "rotate(-30deg)";
                     textBack.appendChild(span);
                 }
-
                 clonedStage.style.backgroundColor = "#fff5f7";
                 clonedStage.prepend(overlay);
                 clonedStage.prepend(textBack);
@@ -251,11 +260,9 @@
             link.download = `婚禮座位表_${new Date().getTime()}.png`;
             link.href = canvas.toDataURL("image/png");
             link.click();
-            
-            // 恢復原本的縮放比例
             stage.style.transform = originalTransform;
         }).catch(err => {
-            alert("匯出失敗，請檢查網路連線或稍後再試。");
+            alert("匯出失敗！");
             stage.style.transform = originalTransform;
         });
     }
@@ -279,7 +286,7 @@
         tableWrap.className = 'table-wrap'; tableWrap.dataset.tableId = id;
         const center = document.createElement('div');
         center.className = 'table-center'; center.innerText = name;
-        center.onclick = () => openModal(tableWrap, name, seatCount);
+        center.onclick = (e) => { e.stopPropagation(); openModal(tableWrap, name, seatCount); };
         tableWrap.appendChild(center);
         const radius = 95; 
         for (let j = 0; j < seatCount; j++) {
@@ -343,11 +350,11 @@
                 if (c) { const info = c.querySelector('small').innerText.split('|'); data.assigned[`${tid}_${idx}`] = {name: c.querySelector('strong').innerText, side: info[0].trim(), role: info[1].trim()}; }
             });
         });
-        localStorage.setItem('wedding_db_final_v11', JSON.stringify(data));
+        localStorage.setItem('wedding_db_v13', JSON.stringify(data));
     }
 
     function loadSavedData() {
-        const raw = localStorage.getItem('wedding_db_final_v11');
+        const raw = localStorage.getItem('wedding_db_v13');
         if (!raw) { createTables(); return; }
         const data = JSON.parse(raw);
         document.getElementById('layout-config').value = data.layout;
@@ -361,8 +368,8 @@
         }
     }
 
-    function clearAllStorage() { if(confirm("確定重置？")) { localStorage.removeItem('wedding_db_final_v11'); location.reload(); } }
-    function downloadTemplate() { const ws = XLSX.utils.aoa_to_sheet([["姓名", "男家/女家", "分類"], ["王小明", "男家", "朋友"]]); const wb = XLSX.utils.book_new(); XLSX.utils.book_append_sheet(wb, ws, "範本"); XLSX.writeFile(wb, "賓客範本.xlsx"); }
+    function clearAllStorage() { if(confirm("確定重置？")) { localStorage.removeItem('wedding_db_v13'); location.reload(); } }
+    function downloadTemplate() { const ws = XLSX.utils.aoa_to_sheet([["姓名", "男家/女家", "分類"], ["王小明", "男家", "同事"]]); const wb = XLSX.utils.book_new(); XLSX.utils.book_append_sheet(wb, ws, "範本"); XLSX.writeFile(wb, "賓客範本.xlsx"); }
     function handleImport(input) {
         const file = input.files[0]; if (!file) return;
         const reader = new FileReader();
